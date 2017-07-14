@@ -1,0 +1,15 @@
+version: '2'
+services:
+  app:
+    image: hexeo/hbot
+    build: .
+    volumes:
+      - ./src/main.ts:/opt/main.ts
+      - ./src/config:/opt/config
+      - ./src/lib:/opt/lib
+      - ./src/schemas:/opt/schemas
+      - ./src/mappings:/opt/mappings
+      - ./src/resources:/opt/resources
+      - ./src/services:/opt/services
+      - ./src/commands:/opt/commands
+      - ./src/controllers:/opt/controllers

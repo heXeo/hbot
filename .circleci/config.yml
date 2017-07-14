@@ -1,0 +1,30 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/hexeo
+    machine: true
+    steps:
+      # Install docker/docker-compose/git commands
+      - run:
+          name: Install docker, docker-compose, git
+          command: |
+            set -ex
+            sudo apt-get -qq update
+            sudo apt-get -qq install -y curl git
+            sudo service docker stop
+            curl -fsSL https://get.docker.com/ | sudo sh
+            docker version
+
+      - checkout
+      - run:
+          name: Build docker image
+          command: |
+            docker build -t hexeo/hbot .
+
+      - deploy:
+          name: Push docker image to docker-hub (master branch only)
+          command: |
+            test "$CIRCLE_BRANCH" = "master" || test "$CIRCLE_BRANCH" = "dev" || exit 0
+            echo "{\"https://index.docker.io/v1/\":{\"auth\":\"<AUTH>\",\"email\":\"<EMAIL>\"}}" | sed "s/<EMAIL>/$DOCKER_EMAIL/;s/<AUTH>/$DOCKER_AUTH/" > ~/.dockercfg
+            docker tag hexeo/hbot hexeo/hbot:v$CIRCLE_BUILD_NUM
+            docker push hexeo/hbot
