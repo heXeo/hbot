@@ -53,7 +53,7 @@ function getBotCommand (text: string) {
 
 function handleEvent (event: any) {
   const botParams = {
-    icon_emoji: config.get<string>('slackBot.icon')
+    icon_emoji: config.get<string>('slack.icon')
   };
   const date = moment.unix(event.time).format('HH:mm:ss');
   const message = `\`\`\`[${date}] ${event.Action} :: ${event.Actor.Attributes.name}\`\`\``
