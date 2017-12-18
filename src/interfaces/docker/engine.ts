@@ -214,10 +214,11 @@ export namespace DockerEngine {
       FailureAction?: string;
       Monitor?: number;
       MaxFailureRatio?: number;
+      Order?: string;
     }
 
     export interface Network {
-      Target: string
+      Target: string;
     }
 
     export interface EndpointSpec {
@@ -234,5 +235,4 @@ export namespace DockerEngine {
       }
     }
   }
-
 }

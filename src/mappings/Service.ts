@@ -96,7 +96,8 @@ function getServiceUpdateConfig (definition: DockerCompose.Service): DockerEngin
     Delay: durationParse(definition.deploy.update_config.delay || '10s') * timeMult,
     FailureAction: definition.deploy.update_config.failure_action,
     Monitor: durationParse(definition.deploy.update_config.monitor || '0s') * timeMult,
-    MaxFailureRatio: definition.deploy.update_config.max_failure_ratio
+    MaxFailureRatio: definition.deploy.update_config.max_failure_ratio,
+    Order: definition.deploy.update_config.order || 'stop-first'
   };
 }
 

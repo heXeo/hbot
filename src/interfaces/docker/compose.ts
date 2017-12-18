@@ -27,7 +27,7 @@ export namespace DockerCompose {
 
   export namespace Network {
     export interface Collection {
-      [key: string]: Network
+      [key: string]: Network;
     }
 
     export interface External {
@@ -108,7 +108,7 @@ export namespace DockerCompose {
     export interface Build {
       context?: string;
       dockerfile?: string;
-      args?: StringDictionnary | Array<string>
+      args?: StringDictionnary | Array<string>;
     }
 
     export interface Deploy {
@@ -118,12 +118,12 @@ export namespace DockerCompose {
       update_config: Deploy.UpdateConfig;
       resources?: Deploy.Resources;
       restart_policy: Deploy.RestartPolicy;
-      labels?: StringDictionnary | Array<string>;
+      labels?: StringDictionnary | Array<string>;
     }
 
     export namespace Deploy {
       export interface Placement {
-        constraints?: Array<string>
+        constraints?: Array<string>;
       }
 
       export interface UpdateConfig {
@@ -132,6 +132,7 @@ export namespace DockerCompose {
         failure_action?: string;
         monitor?: string;
         max_failure_ratio?: number;
+        order?: string;
       }
 
       export interface Resources {
