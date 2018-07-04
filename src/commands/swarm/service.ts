@@ -5,6 +5,7 @@ import {
   deployService,
   scaleService,
   deleteService,
+  getServiceTasks,
   getServiceLogs
 } from '../../controllers/swarm/service';
 
@@ -56,6 +57,13 @@ export default function () {
   .description('Delete service <name>')
   .action((metadata: any, name: string, options: any) => {
     this.handle(metadata, deleteService(name));
+  });
+
+  mainCommand
+  .command('tasks <name>')
+  .description('Get service <name> tasks')
+  .action((metadata: any, name: string, options: any) => {
+    this.handle(metadata, getServiceTasks(name));
   });
 
   mainCommand
