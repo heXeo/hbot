@@ -47,33 +47,21 @@ export async function deployService (name: string, tag: string): Promise<string>
 }
 
 export async function scaleService (name: string, replicas: number): Promise<string> {
-  const serviceDefinition = await opsSvc.getServiceDefinition(name);
-
-  if (!serviceDefinition) {
-    throw new Error(`No service definition for ${name}.`);
-  }
-
-  const serviceApiContents = dockerApiMapper.mapService(serviceDefinition);
-  const serviceApiContent = serviceApiContents[0];
-
   await swarmSvc.scaleService(name, replicas);
 
   return `Service ${name} scaled to ${replicas}.`;
 }
 
 export async function deleteService (name: string): Promise<string> {
-  const serviceDefinition = await opsSvc.getServiceDefinition(name);
-
-  if (!serviceDefinition) {
-    throw new Error(`No service definition for ${name}.`);
-  }
-
-  const serviceApiContents = dockerApiMapper.mapService(serviceDefinition);
-  const serviceApiContent = serviceApiContents[0];
-
   await swarmSvc.deleteService(name);
 
   return `Service ${name} deleted.`
+}
+
+export async function getServiceTasks (name: string): Promise<any> {
+  const tasks = await swarmSvc.getServiceTasks(name);
+
+  return tasks;
 }
 
 export async function getServiceLogs (name: string): Promise<Buffer> {
