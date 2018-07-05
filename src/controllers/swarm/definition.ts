@@ -1,9 +1,9 @@
 import opsSvc from '../../resources/ops';
 
-export function listServiceDefinitions () {
-  return opsSvc.listServiceDefinitions();
+export async function listDefinitions () {
+  return opsSvc.listDefinitions();
 }
 
-export function getServiceDefinition (name: string) {
-  return opsSvc.getServiceDefinition(name);
+export async function getDefinition (name: string) {
+  return opsSvc.getDefinition(name);
 }

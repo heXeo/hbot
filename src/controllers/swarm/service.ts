@@ -30,13 +30,18 @@ export async function searchService (name: string): Promise<any> {
 }
 
 export async function deployService (name: string, tag: string): Promise<string> {
-  const serviceDefinition = await opsSvc.getServiceDefinition(name);
+  const definition = await opsSvc.getDefinition(name);
 
-  if (!serviceDefinition) {
+  if (!definition) {
     throw new Error(`No service definition for ${name}.`);
   }
 
-  const serviceApiContents = dockerApiMapper.mapService(serviceDefinition);
+  const serviceApiContents = dockerApiMapper.mapService(definition);
+
+  if (serviceApiContents.length > 1) {
+    throw new Error(`Definition ${name} contains multiple services.`);
+  }
+
   const serviceApiContent = serviceApiContents[0];
 
   await swarmSvc.createOrUpdateService(name, serviceApiContent, {

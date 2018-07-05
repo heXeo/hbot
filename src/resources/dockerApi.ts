@@ -3,17 +3,17 @@ import DockerApi from '../lib/DockerApi';
 
 export default new DockerApi({
   version: config.get<string>('docker.api.version'),
-  uri: config.get<string>('docker.api.uri'),
-  proxy: {
-    auth: {
-      token: config.get<string>('docker.proxy.auth.token')
+  uri: config.get<string>('agent.uri'),
+  agent: {
+    token: config.get<string>('agent.token'),
+    proxy: {
+      username: config.get<string>('agent.proxy.username'),
+      password: config.get<string>('agent.proxy.password')
     }
   },
   registry: {
-    auth: {
-      email: config.get<string>('docker.registry.auth.email'),
-      username: config.get<string>('docker.registry.auth.username'),
-      password: config.get<string>('docker.registry.auth.password')
-    }
+    email: config.get<string>('docker.registry.email'),
+    username: config.get<string>('docker.registry.username'),
+    password: config.get<string>('docker.registry.password')
   }
 });

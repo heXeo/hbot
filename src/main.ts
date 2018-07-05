@@ -1,6 +1,5 @@
 import * as config from 'config';
 import * as moment from 'moment';
-import * as _ from 'lodash';
 import bot from './resources/slackBot';
 import swarm from './resources/swarm';
 
@@ -57,7 +56,7 @@ function handleEvent (event: any) {
   };
   const date = moment.unix(event.time).format('HH:mm:ss');
   const message = `\`\`\`[${date}] ${event.Action} :: ${event.Actor.Attributes.name}\`\`\``
-  bot.postMessageToChannel(config.get<string>('ops.slackChannel'), message, botParams);
+  bot.postMessageToChannel(config.get<string>('slack.channel'), message, botParams);
 }
 
 swarm.getEventsStream()

@@ -38,11 +38,10 @@ export default function () {
   });
 
   mainCommand
-  .command('deploy <name>')
-  .option('-t, --tag <tag>', 'Set the service tag')
-  .description('Deploy a new service <name> from the service.yml')
-  .action((metadata: any, name: string, options: any) => {
-    this.handle(metadata, deployService(name, options.tag));
+  .command('deploy <name> <tag>')
+  .description('Deploy a service <name>:<tag> from the service.yml')
+  .action((metadata: any, name: string, tag: string, options: any) => {
+    this.handle(metadata, deployService(name, tag));
   });
 
   mainCommand

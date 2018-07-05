@@ -1,5 +1,5 @@
-import * as config from 'config';
 import * as stream from 'stream';
+import * as _ from 'lodash';
 import DockerApi from '../lib/DockerApi';
 import { DockerEngine } from '../interfaces/docker/engine';
 
@@ -21,7 +21,6 @@ function injectImageTag (serviceApiContent: any, tag: string) {
 }
 
 interface ISwarmOptions {
-  imageTagRequired: boolean;
   secretKey: string;
 }
 
@@ -33,10 +32,12 @@ interface ISwarmCreateUpdateServiceOptions {
 export default class Swarm {
   private api: DockerApi;
   private options: ISwarmOptions;
+  private stackLabel: string;
 
   constructor (dockerApi: DockerApi, options: ISwarmOptions) {
     this.api = dockerApi;
     this.options = options;
+    this.stackLabel = 'com.docker.stack.namespace';
   }
 
   async info () {
@@ -49,6 +50,12 @@ export default class Swarm {
 
   async getNode (id: string) {
     return this.api.get(`/nodes/${id}`);
+  }
+
+  async listStacks () {
+    const stacksServices = await this.searchServicesByLabel(this.stackLabel);
+
+    return _.uniqBy(stacksServices, `Spec.Labels['${this.stackLabel}']`)
   }
 
   async listServices () {
@@ -65,6 +72,23 @@ export default class Swarm {
     });
   }
 
+  async searchServicesByLabel (label: string) {
+    return this.api.get('/services', {
+      query: {
+        filters: JSON.stringify({
+          label: [ label ]
+        })
+      }
+    });
+  }
+
+  async searchServicesByStack (name: string) {
+    const services = await this.searchServicesByLabel(this.stackLabel);
+
+    return services
+    .filter((service:any) => service.Spec.Labels[this.stackLabel] === name)
+  }
+
   async findServiceByName (name: string) {
     const services = await this.searchServicesByName(name);
     return services.find((service: any) => service.Spec.Name === name) || null;
@@ -79,10 +103,6 @@ export default class Swarm {
   }
 
   async createOrUpdateService (name: string, apiSpec: any, options: ISwarmCreateUpdateServiceOptions = {}) {
-    if (this.options.imageTagRequired && !options.imageTag) {
-      throw new Error('options.imageTag is required.');
-    }
-
     const serviceInfo = await this.findServiceByName(name);
 
     apiSpec.Name = name;

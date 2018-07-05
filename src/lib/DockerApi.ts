@@ -5,19 +5,17 @@ import * as urlLib from 'url';
 interface IDockerApiOptions {
   version: string;
   uri: string;
-  proxy?: {
-    auth?: {
-      token?: string;
+  agent?: {
+    token?: string;
+    proxy: {
       username?: string;
       password?: string;
     }
   }
   registry: {
-    auth: {
-      email: string;
-      username: string;
-      password: string;
-    }
+    email: string;
+    username: string;
+    password: string;
   }
 }
 
@@ -30,7 +28,7 @@ interface IDockerApiRequestOptions {
 export default class DockerApi {
   private version: string;
   private uri: string;
-  private proxyToken: string;
+  private agentToken: string;
   private proxyAuth: any;
   private registryAuth: string;
 
@@ -38,32 +36,30 @@ export default class DockerApi {
     this.version = options.version || '';
     this.uri = options.uri;
 
-    if (options.proxy) {
-      if (options.proxy.auth) {
-        if (options.proxy.auth.token) {
-          this.proxyToken = options.proxy.auth.token;
-        }
+    if (options.agent) {
+      if (options.agent.token) {
+        this.agentToken = options.agent.token;
+      }
 
-        if (options.proxy.auth.username && options.proxy.auth.password) {
+      if (options.agent.proxy) {
+        if (options.agent.proxy.username && options.agent.proxy.password) {
           this.proxyAuth = {
-            username: options.proxy.auth.username,
-            password: options.proxy.auth.password
+            username: options.agent.proxy.username,
+            password: options.agent.proxy.password
           };
         }
       }
     }
 
     if (options.registry) {
-      if (options.registry.auth) {
-        if (options.registry.auth.email &&
-            options.registry.auth.username &&
-            options.registry.auth.password) {
-          this.registryAuth = Buffer.from(JSON.stringify({
-            email: options.registry.auth.email,
-            username: options.registry.auth.username,
-            password: options.registry.auth.password
-          })).toString('base64');
-        }
+      if (options.registry.email &&
+          options.registry.username &&
+          options.registry.password) {
+        this.registryAuth = Buffer.from(JSON.stringify({
+          email: options.registry.email,
+          username: options.registry.username,
+          password: options.registry.password
+        })).toString('base64');
       }
     }
   }
@@ -78,8 +74,8 @@ export default class DockerApi {
       uri: urlLib.resolve(this.uri, apiPath)
     };
 
-    if (this.proxyToken) {
-      requestOptions.headers['X-Auth-Token'] = this.proxyToken;
+    if (this.agentToken) {
+      requestOptions.headers['X-Auth-Token'] = this.agentToken;
     }
 
     if (this.registryAuth) {

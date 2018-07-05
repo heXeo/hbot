@@ -17,15 +17,15 @@ export default class Ops {
     this.options = options;
   }
 
-  async getServiceDefinition (serviceName: string): Promise<any> {
+  async getDefinition (definitionName: string): Promise<any> {
     const githubPath = pathLib.join(
       '/repos', this.options.repository, 'contents',
-      this.options.repositoryPath, `${serviceName}.yml`
+      this.options.repositoryPath, `${definitionName}.yml`
     );
 
     try {
-      const serviceFile: Github.Content.IContent = await this.api.get(githubPath);
-      const ymlDefinition = Buffer.from(serviceFile.content, 'base64').toString();
+      const definitionFile: Github.Content.IContent = await this.api.get(githubPath);
+      const ymlDefinition = Buffer.from(definitionFile.content, 'base64').toString();
       const jsonDefinition = yaml.safeLoad(ymlDefinition);
       return jsonDefinition;
     } catch (error) {
@@ -34,18 +34,18 @@ export default class Ops {
     }
   }
 
-  async listServiceDefinitions (): Promise<string[]> {
+  async listDefinitions (): Promise<string[]> {
     const githubPath = pathLib.join(
       '/repos', this.options.repository, 'contents',
       this.options.repositoryPath
     );
 
-    const serviceFiles: Github.Content.IContent[] = await this.api.get(githubPath);
-    return serviceFiles
-    .filter((serviceFile) => {
-      return (serviceFile.type === 'file')
-        && (serviceFile.name.endsWith('.yml'));
+    const definitionFiles: Github.Content.IContent[] = await this.api.get(githubPath);
+    return definitionFiles
+    .filter((definitionFile) => {
+      return (definitionFile.type === 'file')
+        && (definitionFile.name.endsWith('.yml'));
     })
-    .map((serviceFile) => serviceFile.name);
+    .map((definitionFile) => definitionFile.name);
   }
 }

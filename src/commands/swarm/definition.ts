@@ -1,6 +1,6 @@
 import {
-  listServiceDefinitions,
-  getServiceDefinition
+  listDefinitions,
+  getDefinition
 } from '../../controllers/swarm/definition';
 
 export default function () {
@@ -12,14 +12,14 @@ export default function () {
   .command('list')
   .description('List service definitions')
   .action((metadata: any, options: any) => {
-    this.handle(metadata, listServiceDefinitions());
+    this.handle(metadata, listDefinitions());
   });
 
   mainCommand
   .command('show <name>')
   .description('Show service definitions')
   .action((metadata: any, name: string, options: any) => {
-    this.handle(metadata, getServiceDefinition(name));
+    this.handle(metadata, getDefinition(name));
   });
 
   mainCommand
