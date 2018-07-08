@@ -26,11 +26,7 @@ export async function deployStack (name: string): Promise<string> {
   }
 
   const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
-  Promise.all(serviceApiContents.map(
-    (serviceApiContent: any) => swarmSvc.createOrUpdateService(
-      `${name}_${serviceApiContent.Name}`, serviceApiContent
-    )
-  ));
+  await swarmSvc.createOrUpdateStack(name, serviceApiContents);
 
   return `Stack ${name} deployed.`;
 }

@@ -6,8 +6,8 @@ module.exports = {
     uri: env.AGENT_URI || 'http://localhost',
     token: env.AGENT_TOKEN,
     proxy: {
-      username: env.AGENT_PROXY_USERNAME,
-      password: env.AGENT_PROXY_PASSWORD
+      username: env.AGENT_PROXY_USERNAME || null,
+      password: env.AGENT_PROXY_PASSWORD || null
     }
   },
   slack: {
@@ -21,9 +21,9 @@ module.exports = {
       version: env.DOCKER_API_VERSION || '1.26'
     },
     registry: {
-      email: env.DOCKER_REGISTRY_AUTH_EMAIL,
-      username: env.DOCKER_REGISTRY_AUTH_USER,
-      password: env.DOCKER_REGISTRY_AUTH_PASS
+      email: env.DOCKER_REGISTRY_EMAIL,
+      username: env.DOCKER_REGISTRY_USERNAME,
+      password: env.DOCKER_REGISTRY_PASSWORD
     }
   },
   github: {

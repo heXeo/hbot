@@ -5,6 +5,9 @@ import { DockerEngine } from '../interfaces/docker/engine';
 
 const JStream = require('jstream');
 
+const stackNamespaceLabel = 'com.docker.stack.namespace';
+const stackImageLabel = 'com.docker.stack.image';
+
 function injectSecretKey (secretKey: string, serviceApiContent: any) {
   const env = serviceApiContent.TaskTemplate.ContainerSpec.Env;
 
@@ -20,6 +23,21 @@ function injectImageTag (serviceApiContent: any, tag: string) {
   serviceApiContent.TaskTemplate.ContainerSpec.Image = finalImage;
 }
 
+function injectStackLabels (serviceApiContent: any, stackName: string) {
+  const imageParts = serviceApiContent.TaskTemplate.ContainerSpec.Image.split(':');
+  const imageLabel = (!imageParts[1] || imageParts[1].toLowerCase() === 'latest') ?
+    imageParts[0] : `${imageParts[0]}:${imageParts[1]}`;
+
+  serviceApiContent.Labels = {
+      [stackNamespaceLabel]: stackName,
+      [stackImageLabel]: imageLabel
+  };
+
+  serviceApiContent.TaskTemplate.Labels = {
+    [stackNamespaceLabel]: stackName
+  };
+}
+
 interface ISwarmOptions {
   secretKey: string;
 }
@@ -32,12 +50,10 @@ interface ISwarmCreateUpdateServiceOptions {
 export default class Swarm {
   private api: DockerApi;
   private options: ISwarmOptions;
-  private stackLabel: string;
 
   constructor (dockerApi: DockerApi, options: ISwarmOptions) {
     this.api = dockerApi;
     this.options = options;
-    this.stackLabel = 'com.docker.stack.namespace';
   }
 
   async info () {
@@ -53,9 +69,22 @@ export default class Swarm {
   }
 
   async listStacks () {
-    const stacksServices = await this.searchServicesByLabel(this.stackLabel);
+    const stacksServices = await this.searchServicesByLabel(stackNamespaceLabel);
 
-    return _.uniqBy(stacksServices, `Spec.Labels['${this.stackLabel}']`)
+    return _.uniqBy(stacksServices, `Spec.Labels['${stackNamespaceLabel}']`)
+    .map((service: any) => service.Spec.Labels[stackNamespaceLabel])
+  }
+
+  async createOrUpdateStack (name: string, apiSpecs: any[]) {
+    apiSpecs.forEach((apiSpec: any) => {
+      injectStackLabels(apiSpec, name);
+    });
+
+    return Promise.all(apiSpecs.map(
+      (apiSpec: any) => this.createOrUpdateService(
+        `${name}_${apiSpec.Name}`, apiSpec
+      )
+    ));
   }
 
   async listServices () {
@@ -83,10 +112,10 @@ export default class Swarm {
   }
 
   async searchServicesByStack (name: string) {
-    const services = await this.searchServicesByLabel(this.stackLabel);
+    const services = await this.searchServicesByLabel(stackNamespaceLabel);
 
     return services
-    .filter((service:any) => service.Spec.Labels[this.stackLabel] === name)
+    .filter((service:any) => service.Spec.Labels[stackNamespaceLabel] === name)
   }
 
   async findServiceByName (name: string) {

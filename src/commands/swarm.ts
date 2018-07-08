@@ -3,6 +3,7 @@ import * as yaml from 'js-yaml';
 
 import registerInfoCommand from './swarm/info';
 import registerNodesCommand from './swarm/node';
+import registerStacksCommand from './swarm/stack';
 import registerServicesCommand from './swarm/service';
 import registerDefinitionsCommand from './swarm/definition';
 
@@ -45,6 +46,7 @@ module.exports = (Commander: any) => {
 
   registerInfoCommand.call(context);
   registerNodesCommand.call(context);
+  registerStacksCommand.call(context);
   registerServicesCommand.call(context);
   registerDefinitionsCommand.call(context);
 

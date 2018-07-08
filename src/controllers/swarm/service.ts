@@ -39,7 +39,7 @@ export async function deployService (name: string, tag: string): Promise<string>
   const serviceApiContents = dockerApiMapper.mapService(definition);
 
   if (serviceApiContents.length > 1) {
-    throw new Error(`Definition ${name} contains multiple services.`);
+    throw new Error(`It looks like ${name} is a stack definition, use stack command instead.`);
   }
 
   const serviceApiContent = serviceApiContents[0];
