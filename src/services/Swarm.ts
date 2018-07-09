@@ -75,10 +75,22 @@ export default class Swarm {
     .map((service: any) => service.Spec.Labels[stackNamespaceLabel])
   }
 
-  async createOrUpdateStack (name: string, apiSpecs: any[]) {
+  async createOrUpdateStack (name: string, apiSpecs: any[], prune: boolean = false) {
     apiSpecs.forEach((apiSpec: any) => {
       injectStackLabels(apiSpec, name);
     });
+
+    if (prune) {
+      const currentServices = await this.searchServicesByStack(name);
+      const servicesToPrune = currentServices
+      .filter((currentService:any) => apiSpecs.findIndex(
+        (apiSpec:any) => currentService.Spec.Name === `${name}_${apiSpec.Name}`
+      ) === -1);
+
+      await Promise.all(servicesToPrune.map(
+        (serviceToPrune:any) => this.deleteService(serviceToPrune.Spec.Name)
+      ));
+    }
 
     return Promise.all(apiSpecs.map(
       (apiSpec: any) => this.createOrUpdateService(

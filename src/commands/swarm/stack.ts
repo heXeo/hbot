@@ -26,9 +26,10 @@ export default function () {
 
   mainCommand
   .command('deploy <name>')
-  .description('Deploy a new stack <name> from the stack.yml')
+  .description('Deploy a new stack <name> from the stack.yml.')
+  .option('-p, --prune', 'Prune services that are no longer referenced')
   .action((metadata: any, name: string, options: any) => {
-    this.handle(metadata, deployStack(name));
+    this.handle(metadata, deployStack(name, options.prune));
   });
 
    mainCommand

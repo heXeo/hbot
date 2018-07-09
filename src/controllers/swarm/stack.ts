@@ -18,7 +18,7 @@ export async function getStackServices (name: string): Promise<any> {
   ])));
 }
 
-export async function deployStack (name: string): Promise<string> {
+export async function deployStack (name: string, prune: boolean = false): Promise<string> {
   const stackDefinition = await opsSvc.getDefinition(name);
 
   if (!stackDefinition) {
@@ -26,7 +26,7 @@ export async function deployStack (name: string): Promise<string> {
   }
 
   const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
-  await swarmSvc.createOrUpdateStack(name, serviceApiContents);
+  await swarmSvc.createOrUpdateStack(name, serviceApiContents, prune);
 
   return `Stack ${name} deployed.`;
 }
