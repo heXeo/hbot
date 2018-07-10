@@ -26,9 +26,22 @@ export async function deployStack (name: string, prune: boolean = false): Promis
   }
 
   const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
-  await swarmSvc.createOrUpdateStack(name, serviceApiContents, prune);
+  await swarmSvc.createOrUpdateStack(name, serviceApiContents, [], prune);
 
   return `Stack ${name} deployed.`;
+}
+
+export async function updateStack (name: string, servicesTags: any): Promise<string> {
+  const stackDefinition = await opsSvc.getDefinition(name);
+
+  if (!stackDefinition) {
+    throw new Error(`No stack definition for ${name}.`);
+  }
+
+  const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
+  await swarmSvc.createOrUpdateStack(name, serviceApiContents, servicesTags);
+
+  return `Stack ${name} updated.`;
 }
 
 export async function deleteStack (name: string): Promise<string> {

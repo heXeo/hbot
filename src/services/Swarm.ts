@@ -75,10 +75,20 @@ export default class Swarm {
     .map((service: any) => service.Spec.Labels[stackNamespaceLabel])
   }
 
-  async createOrUpdateStack (name: string, apiSpecs: any[], prune: boolean = false) {
+  async createOrUpdateStack (name: string, apiSpecs: any[], servicesTags: any[], prune: boolean = false) {
     apiSpecs.forEach((apiSpec: any) => {
       injectStackLabels(apiSpec, name);
     });
+    const servicesToUpdate = servicesTags.reduce((result: any, serviceTag: any) => {
+      const serviceTagParts = serviceTag.split(':');
+      result.services.push(serviceTagParts[0]);
+      if (serviceTagParts.length < 2) {
+        throw new Error(`${serviceTag} is missing the tag part`);
+      }
+      result.tags.push(serviceTagParts[1] ? serviceTagParts[1] : 'latest');
+
+      return result;
+    }, { services: [], tags: [] });
 
     if (prune) {
       const currentServices = await this.searchServicesByStack(name);
@@ -93,9 +103,15 @@ export default class Swarm {
     }
 
     return Promise.all(apiSpecs.map(
-      (apiSpec: any) => this.createOrUpdateService(
-        `${name}_${apiSpec.Name}`, apiSpec
-      )
+      (apiSpec: any) => {
+        const tagIndex = servicesToUpdate.services.indexOf(apiSpec.Name);
+        if (tagIndex >= 0) {
+          return this.createOrUpdateService(`${name}_${apiSpec.Name}`, apiSpec, {
+            imageTag: servicesToUpdate.tags[tagIndex]
+          });
+        }
+        return this.createOrUpdateService(`${name}_${apiSpec.Name}`, apiSpec);
+      }
     ));
   }
 
