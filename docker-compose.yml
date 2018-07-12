@@ -3,13 +3,11 @@ services:
   app:
     image: hexeo/hbot
     build: .
+    command: npm run dev
     volumes:
-      - ./src/main.ts:/opt/main.ts
-      - ./src/config:/opt/config
-      - ./src/lib:/opt/lib
-      - ./src/schemas:/opt/schemas
-      - ./src/mappings:/opt/mappings
-      - ./src/resources:/opt/resources
-      - ./src/services:/opt/services
-      - ./src/commands:/opt/commands
-      - ./src/controllers:/opt/controllers
+      - ./tsconfig.json:/opt/tsconfig.json
+      - ./package.json:/opt/package.json
+      - ./package-lock.json:/opt/package-lock.json
+      - ./config:/opt/config
+      - ./src:/opt/src
+      - ./tests:/opt/tests

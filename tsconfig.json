@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "target": "es6",
+    "rootDir": "src",
     "module": "commonjs",
     "moduleResolution": "node",
     "isolatedModules": false,
@@ -22,8 +23,8 @@
     "node_modules"
   ],
   "include": [
-    "**/*.ts",
-    "**/*.d.ts"
+    "src/**/*.ts",
+    "src/**/*.d.ts"
   ],
   "compileOnSave": false,
   "buildOnSave": false,

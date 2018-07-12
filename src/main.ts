@@ -17,7 +17,7 @@ Commander.setSend((metadata: any, text: string) => {
   bot.postMessage(metadata.channel, text, botParams);
 });
 
-Commander.load('commands/swarm.ts');
+Commander.load('src/commands/swarm.ts');
 
 bot.on('start', () => {
   console.log('Started.');

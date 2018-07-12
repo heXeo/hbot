@@ -1,7 +1,8 @@
 {
   "scripts": {
-    "start": "ts-node main.ts",
-    "test": "mocha --opts tests/mocha.opts"
+    "start": "ts-node src/main.ts",
+    "dev": "nodemon --ext js,ts --watch './src' --exec npm run start",
+    "test": "mocha --opts src/tests/mocha.opts"
   },
   "dependencies": {
     "@types/bytes": "^2.4.33",
@@ -34,5 +35,8 @@
     "ts-node": "^3.2.0",
     "typescript": "^2.4.1",
     "ws": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.1"
   }
 }
