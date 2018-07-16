@@ -1,7 +1,7 @@
 import * as flat from 'flat';
 import * as yaml from 'js-yaml';
 
-import registerInfoCommand from './swarm/info';
+import registerInfoCommand from './swarm/main';
 import registerNodesCommand from './swarm/node';
 import registerStacksCommand from './swarm/stack';
 import registerServicesCommand from './swarm/service';

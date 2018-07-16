@@ -1,6 +1,6 @@
 version: '2'
 services:
-  app:
+  bot:
     image: hexeo/hbot
     build: .
     command: npm run dev

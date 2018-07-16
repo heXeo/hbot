@@ -2,7 +2,6 @@ import {
   listServices,
   getService,
   searchService,
-  deployService,
   scaleService,
   deleteService,
   getServiceTasks,
@@ -35,13 +34,6 @@ export default function () {
   .description('Search service based on <name>')
   .action((metadata: any, name: string, options: any) => {
     this.handle(metadata, searchService(name));
-  });
-
-  mainCommand
-  .command('deploy <name> <tag>')
-  .description('Deploy a service <name>:<tag> from the service.yml')
-  .action((metadata: any, name: string, tag: string, options: any) => {
-    this.handle(metadata, deployService(name, tag));
   });
 
   mainCommand

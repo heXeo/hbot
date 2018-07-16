@@ -27,23 +27,23 @@ export default class DockerApiMapper {
     return require(`../schemas/${fileName}`);
   }
 
-  mapService (composeValues: DockerCompose.Compose) {
+  mapServices(composeValues: DockerCompose.Compose) {
     const composeVersion = composeValues.version;
 
     if (!composeVersion) {
-      throw new Error('Service file have no version.');
+      throw new Error('Definition file have no version.');
     }
 
     const composeSchema = this.loadSchema(composeVersion);
 
     if (!composeSchema) {
-      throw new Error('Service file version not managed.');
+      throw new Error('Definition file version not managed.');
     }
 
     const valid = this.validator.validate(composeValues, composeSchema);
     if (!valid) {
       console.error(this.validator.errors);
-      throw new Error('Service file not valid.');
+      throw new Error('Definition file not valid.');
     }
 
     return Service.fromComposeCollection(composeValues.services, composeValues.networks);

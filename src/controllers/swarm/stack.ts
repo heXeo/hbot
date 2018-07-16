@@ -1,7 +1,5 @@
 import * as _ from 'lodash';
 import swarmSvc from '../../resources/swarm';
-import opsSvc from '../../resources/ops';
-import dockerApiMapper from '../../resources/dockerApiMapper';
 
 export async function listStacks (): Promise<any> {
   return swarmSvc.listStacks();
@@ -18,31 +16,6 @@ export async function getStackServices (name: string): Promise<any> {
   ])));
 }
 
-export async function deployStack (name: string, prune: boolean = false): Promise<string> {
-  const stackDefinition = await opsSvc.getDefinition(name);
-
-  if (!stackDefinition) {
-    throw new Error(`No stack definition for ${name}.`);
-  }
-
-  const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
-  await swarmSvc.createOrUpdateStack(name, serviceApiContents, [], prune);
-
-  return `Stack ${name} deployed.`;
-}
-
-export async function updateStack (name: string, servicesTags: any): Promise<string> {
-  const stackDefinition = await opsSvc.getDefinition(name);
-
-  if (!stackDefinition) {
-    throw new Error(`No stack definition for ${name}.`);
-  }
-
-  const serviceApiContents = dockerApiMapper.mapService(stackDefinition);
-  await swarmSvc.createOrUpdateStack(name, serviceApiContents, servicesTags);
-
-  return `Stack ${name} updated.`;
-}
 
 export async function deleteStack (name: string): Promise<string> {
   const services = await getStackServices(name);

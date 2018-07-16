@@ -1,7 +1,5 @@
 import * as _ from 'lodash';
 import swarmSvc from '../../resources/swarm';
-import opsSvc from '../../resources/ops';
-import dockerApiMapper from '../../resources/dockerApiMapper';
 import * as JSZip from 'jszip';
 
 export async function listServices (): Promise<any> {
@@ -27,28 +25,6 @@ export async function searchService (name: string): Promise<any> {
     'Spec.Mode.Replicated.Replicas',
     'Spec.TaskTemplate.ContainerSpec.Image'
   ])));
-}
-
-export async function deployService (name: string, tag: string): Promise<string> {
-  const definition = await opsSvc.getDefinition(name);
-
-  if (!definition) {
-    throw new Error(`No service definition for ${name}.`);
-  }
-
-  const serviceApiContents = dockerApiMapper.mapService(definition);
-
-  if (serviceApiContents.length > 1) {
-    throw new Error(`It looks like ${name} is a stack definition, use stack command instead.`);
-  }
-
-  const serviceApiContent = serviceApiContents[0];
-
-  await swarmSvc.createOrUpdateService(name, serviceApiContent, {
-    imageTag: tag
-  });
-
-  return `Service ${name} deployed.`;
 }
 
 export async function scaleService (name: string, replicas: number): Promise<string> {

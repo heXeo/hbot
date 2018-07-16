@@ -106,4 +106,4 @@ networks:
 If you want to report a bug or request a feature, please open an issue.
 
 If want to help us improve hbot, fork and make a pull request.
-But before drop an eye on [emoji commit](https://gist.github.com/parmentf/035de27d6ed1dce0b36a).
+But before drop an eye on [emoji commit](https://github.com/slashsBin/styleguide-git-commit-message).

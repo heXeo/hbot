@@ -7,8 +7,9 @@ const JStream = require('jstream');
 
 const stackNamespaceLabel = 'com.docker.stack.namespace';
 const stackImageLabel = 'com.docker.stack.image';
+const definitionLabel = 'be.hexeo.definition.name';
 
-function injectSecretKey (secretKey: string, serviceApiContent: any) {
+function injectSecretKey (serviceApiContent: any, secretKey: string) {
   const env = serviceApiContent.TaskTemplate.ContainerSpec.Env;
 
   serviceApiContent.TaskTemplate.ContainerSpec.Env = (env || [])
@@ -17,34 +18,42 @@ function injectSecretKey (secretKey: string, serviceApiContent: any) {
   return serviceApiContent;
 }
 
-function injectImageTag (serviceApiContent: any, tag: string) {
-  const imageParts = serviceApiContent.TaskTemplate.ContainerSpec.Image.split(':');
-  const finalImage = `${imageParts[0]}:${tag}`;
-  serviceApiContent.TaskTemplate.ContainerSpec.Image = finalImage;
-}
-
 function injectStackLabels (serviceApiContent: any, stackName: string) {
   const imageParts = serviceApiContent.TaskTemplate.ContainerSpec.Image.split(':');
   const imageLabel = (!imageParts[1] || imageParts[1].toLowerCase() === 'latest') ?
     imageParts[0] : `${imageParts[0]}:${imageParts[1]}`;
 
-  serviceApiContent.Labels = {
-      [stackNamespaceLabel]: stackName,
-      [stackImageLabel]: imageLabel
-  };
+  serviceApiContent.Labels = Object.assign(serviceApiContent.Labels || {}, {
+    [stackNamespaceLabel]: stackName,
+    [stackImageLabel]: imageLabel
+  });
 
-  serviceApiContent.TaskTemplate.Labels = {
-    [stackNamespaceLabel]: stackName
-  };
+  serviceApiContent.TaskTemplate.ContainerSpec.Labels = Object.assign(
+    serviceApiContent.TaskTemplate.ContainerSpec.Labels || {}, {
+      [stackNamespaceLabel]: stackName
+    }
+  );
+}
+
+function clearStackLabels (serviceApiContent: any, stackName: string) {
+  if (serviceApiContent.Labels) {
+    delete serviceApiContent.Labels[stackNamespaceLabel];
+    delete serviceApiContent.Labels[stackImageLabel];
+  }
+
+  if (serviceApiContent.TaskTemplate.Labels) {
+    delete serviceApiContent.TaskTemplate.Labels[stackNamespaceLabel];
+  }
+}
+
+function injectDefinitionLabel (serviceApiContent: any, definitonName: string) {
+  serviceApiContent.Labels = Object.assign(serviceApiContent.Labels || {}, {
+      [definitionLabel]: definitonName,
+  });
 }
 
 interface ISwarmOptions {
   secretKey: string;
-}
-
-interface ISwarmCreateUpdateServiceOptions {
-  imageTag?: string;
-  suffix?: string;
 }
 
 export default class Swarm {
@@ -58,6 +67,46 @@ export default class Swarm {
 
   async info () {
     return this.api.get('/info');
+  }
+
+  async deploy (definitionName: string, apiSpecs: any[]) {
+    const isStack = apiSpecs.length > 1;
+
+    return Promise.all(apiSpecs.map(async (apiSpec: any) => {
+      const serviceName = isStack ? `${definitionName}_${apiSpec.Name}` : definitionName;
+      const currentService = await this.findServiceByName(serviceName);
+
+      apiSpec.Name = serviceName;
+
+      injectDefinitionLabel(apiSpec, definitionName);
+      if (this.options.secretKey) {
+        injectSecretKey(apiSpec, this.options.secretKey);
+      }
+      if (isStack) {
+        injectStackLabels(apiSpec, definitionName);
+      } else {
+        // Makes sure labels don't stay when services are removed from definition
+        // and only 1 service stays
+        clearStackLabels(apiSpec, definitionName);
+      }
+
+      if (!currentService) {
+        return this.api.post('/services/create', {
+          body: apiSpec
+        });
+      }
+
+      const previousSpec: DockerEngine.Service = currentService.Spec;
+      const id = currentService.ID;
+      const version = currentService.Version.Index;
+      // Makes sure service always redeploys
+      apiSpec.TaskTemplate.ForceUpdate = (previousSpec.TaskTemplate.ForceUpdate || 0) + 1;
+
+      return this.api.post(`/services/${id}/update`, {
+        query: { version: version },
+        body: apiSpec
+      });
+    }));
   }
 
   async listNodes () {
@@ -75,44 +124,15 @@ export default class Swarm {
     .map((service: any) => service.Spec.Labels[stackNamespaceLabel])
   }
 
-  async createOrUpdateStack (name: string, apiSpecs: any[], servicesTags: any[], prune: boolean = false) {
-    apiSpecs.forEach((apiSpec: any) => {
-      injectStackLabels(apiSpec, name);
-    });
-    const servicesToUpdate = servicesTags.reduce((result: any, serviceTag: any) => {
-      const serviceTagParts = serviceTag.split(':');
-      result.services.push(serviceTagParts[0]);
-      if (serviceTagParts.length < 2) {
-        throw new Error(`${serviceTag} is missing the tag part`);
-      }
-      result.tags.push(serviceTagParts[1] ? serviceTagParts[1] : 'latest');
+  async checkUnreferencedServices (definitionName: string, apiSpecs: any[]) {
+    const currentServices = await this.searchServicesByDefinition(definitionName);
 
-      return result;
-    }, { services: [], tags: [] });
-
-    if (prune) {
-      const currentServices = await this.searchServicesByStack(name);
-      const servicesToPrune = currentServices
-      .filter((currentService:any) => apiSpecs.findIndex(
-        (apiSpec:any) => currentService.Spec.Name === `${name}_${apiSpec.Name}`
-      ) === -1);
-
-      await Promise.all(servicesToPrune.map(
-        (serviceToPrune:any) => this.deleteService(serviceToPrune.Spec.Name)
-      ));
-    }
-
-    return Promise.all(apiSpecs.map(
-      (apiSpec: any) => {
-        const tagIndex = servicesToUpdate.services.indexOf(apiSpec.Name);
-        if (tagIndex >= 0) {
-          return this.createOrUpdateService(`${name}_${apiSpec.Name}`, apiSpec, {
-            imageTag: servicesToUpdate.tags[tagIndex]
-          });
-        }
-        return this.createOrUpdateService(`${name}_${apiSpec.Name}`, apiSpec);
-      }
-    ));
+    return currentServices
+    .filter((currentService:any) => (apiSpecs.findIndex((apiSpec:any) => {
+        return currentService.Spec.Name === `${definitionName}_${apiSpec.Name}` ||
+        currentService.Spec.Name === `${definitionName}`
+      }) === -1)
+    );
   }
 
   async listServices () {
@@ -139,11 +159,12 @@ export default class Swarm {
     });
   }
 
-  async searchServicesByStack (name: string) {
-    const services = await this.searchServicesByLabel(stackNamespaceLabel);
+  async searchServicesByDefinition (name: string) {
+    return this.searchServicesByLabel(`${definitionLabel}=${name}`);
+  }
 
-    return services
-    .filter((service:any) => service.Spec.Labels[stackNamespaceLabel] === name)
+  async searchServicesByStack (name: string) {
+    return this.searchServicesByLabel(`${stackNamespaceLabel}=${name}`);
   }
 
   async findServiceByName (name: string) {
@@ -157,34 +178,6 @@ export default class Swarm {
       throw new Error(`Service ${name} not found.`);
     }
     return service;
-  }
-
-  async createOrUpdateService (name: string, apiSpec: any, options: ISwarmCreateUpdateServiceOptions = {}) {
-    const serviceInfo = await this.findServiceByName(name);
-
-    apiSpec.Name = name;
-
-    if (options.imageTag) {
-      injectImageTag(apiSpec, options.imageTag);
-    }
-    injectSecretKey(this.options.secretKey, apiSpec);
-
-    if (!serviceInfo) {
-      return this.api.post('/services/create', {
-        body: apiSpec
-      });
-    }
-
-    const previousSpec: DockerEngine.Service = serviceInfo.Spec;
-    const id = serviceInfo.ID;
-    const version = serviceInfo.Version.Index;
-    // Makes sure service always redeploys
-    apiSpec.TaskTemplate.ForceUpdate = (previousSpec.TaskTemplate.ForceUpdate || 0) + 1;
-
-    return this.api.post(`/services/${id}/update`, {
-      query: { version: version },
-      body: apiSpec
-    });
   }
 
   async scaleService (name: string, replicas: number) {

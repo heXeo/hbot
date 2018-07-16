@@ -35,8 +35,10 @@ export default class Ops {
       const definition = yaml.safeLoad(ymlDefinition);
       return definition;
     } catch (error) {
-      console.error(error);
-      return null;
+      if (error.statusCode === 404) {
+        return null;
+      }
+      throw error;
     }
   }
 
@@ -55,7 +57,7 @@ export default class Ops {
     .map((definitionFile) => definitionFile.name);
   }
 
-  async updateDefinition (name: string, servicesTags: any[]): Promise<string> {
+  async updateDefinition (name: string, servicesTags: any[]): Promise<any> {
     const githubPath = pathLib.join(
       '/repos', this.options.repository, 'contents',
       this.options.repositoryPath, `${name}.yml`
@@ -69,18 +71,28 @@ export default class Ops {
       const serviceToUpdate = definition.services[serviceTagParts[0]];
       const newTag = serviceTagParts[1];
 
-      if (serviceToUpdate && newTag) {
-        injectImageTag(serviceToUpdate, newTag);
+      if (serviceTagParts.legnth > 2) {
+        throw new Error(`Too many ":" separator for ${serviceTag}`);
       }
+      if (!newTag) {
+        throw new Error(`${serviceTag} is missing the tag part`);
+      }
+      if (!serviceToUpdate) {
+        throw new Error(`${serviceTagParts[0]} doesn't exist in the ${name} definition`);
+      }
+
+      injectImageTag(serviceToUpdate, newTag);
     });
 
     const newYmlDefinition = yaml.safeDump(definition);
-    return this.api.put(githubPath, {
+    await this.api.put(githubPath, {
       body: {
         message: 'image tags update',
         content: Buffer.from(newYmlDefinition).toString('base64'),
         sha: definitionFile.sha
       }
     });
+
+    return definition;
   }
 }
