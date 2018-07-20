@@ -27,7 +27,7 @@
     "lib": ["esnext", "dom"]
   },
   "exclude": ["node_modules"],
-  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "tests/**/*.ts"],
   "compileOnSave": false,
   "buildOnSave": false,
   "atom": {

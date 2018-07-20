@@ -1,5 +1,6 @@
 import _ from 'lodash'
 import path from 'path'
+import parsePortShortFormat from '../helpers/parsePortShortFormat'
 import {DockerCompose} from '../interfaces/docker/compose'
 import {DockerEngine} from '../interfaces/docker/engine'
 import {RAMInBytes as getRAMInBytes} from './go-units/size'
@@ -428,6 +429,66 @@ function getContainerHealthCheck(
   return config
 }
 
+function getPortRange(start: number, end?: number): Array<Number> {
+  if (!start) {
+    return []
+  }
+
+  const rangeStart = start
+  const rangeEnd = (end || start) + 1
+
+  return _.range(rangeStart, rangeEnd)
+}
+
+function getServicePorts(
+  definition: DockerCompose.Service
+): Array<DockerEngine.Service.EndpointSpec.PortConfig> | undefined {
+  if (!definition || !definition.ports) {
+    return undefined
+  }
+
+  return definition.ports.reduce((result: any[], port: any) => {
+    if (typeof port === 'string') {
+      // published_ip seems to be used...
+      const parsedPort = parsePortShortFormat(port)
+      if (!parsedPort) {
+        throw new Error(`Incorrect port format for ${port}`)
+      }
+      const targetRange = getPortRange(
+        parsedPort.containerPort,
+        parsedPort.containerPortEnd
+      )
+      const publishedRange = getPortRange(
+        parsedPort.hostPort,
+        parsedPort.hostPortEnd
+      )
+
+      if (
+        publishedRange.length > 0 &&
+        targetRange.length !== publishedRange.length
+      ) {
+        throw new Error(`Port mapping ranges don't have the same length`)
+      }
+
+      targetRange.forEach((target: Number, i) => {
+        result.push({
+          Protocol: parsedPort.protocol || 'tcp',
+          TargetPort: target,
+          PublishedPort: publishedRange[i],
+        })
+      })
+    } else {
+      result.push({
+        Protocol: port.protocol || 'tcp',
+        TargetPort: port.target,
+        PublishedPort: port.published,
+      })
+    }
+
+    return result
+  }, [])
+}
+
 export function fromCompose(
   name: string,
   definition: DockerCompose.Service,
@@ -468,6 +529,7 @@ export function fromCompose(
       (networks && getServiceNetworks(definition, networks)) || undefined,
     EndpointSpec: {
       Mode: 'vip',
+      Ports: getServicePorts(definition),
     },
   }
 }

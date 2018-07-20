@@ -3,6 +3,8 @@ services:
   bot:
     image: hexeo/hbot
     build: .
+    env_file:
+      - .env
     command: npm run dev
     volumes:
       - ./tsconfig.json:/opt/tsconfig.json

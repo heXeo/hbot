@@ -2,7 +2,7 @@
   "scripts": {
     "start": "ts-node --files --pretty src/main.ts",
     "dev": "nodemon --ext js,ts --watch './src' --exec npm run start",
-    "test": "mocha --opts src/tests/mocha.opts",
+    "test": "mocha --opts tests/mocha.opts",
     "test:lint": "eslint 'src/**/*.ts'",
     "test:type-check": "tsc --noEmit"
   },
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@types/bytes": "^3.0.0",
+    "@types/chai": "^4.1.4",
     "@types/config": "^0.0.34",
     "@types/flat": "0.0.28",
     "@types/js-yaml": "^3.11.2",
@@ -39,6 +40,7 @@
     "@types/node": "^8.10.21",
     "@types/request-promise-native": "^1.0.15",
     "@types/ws": "^5.1.2",
+    "chai": "^4.1.2",
     "eslint": "^5.2.0",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-typescript": "^0.12.0",
