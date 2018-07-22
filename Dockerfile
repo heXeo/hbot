@@ -1,4 +1,4 @@
-FROM node:8.1-alpine
+FROM node:10-alpine
 
 COPY ./src /opt/config
 COPY ./src /opt/src

@@ -1,4 +1,4 @@
-const env = process.env;
+const env = process.env
 
 module.exports = {
   agent: {
@@ -6,30 +6,30 @@ module.exports = {
     token: env.AGENT_TOKEN,
     proxy: {
       username: env.AGENT_PROXY_USERNAME || null,
-      password: env.AGENT_PROXY_PASSWORD || null
-    }
+      password: env.AGENT_PROXY_PASSWORD || null,
+    },
   },
   slack: {
     name: env.SLACK_BOT_NAME,
     token: env.SLACK_BOT_TOKEN,
     icon: env.SLACK_BOT_ICON || ':robot_face:',
-    channel: env.SLACK_CHANNEL || 'ops'
+    channel: env.SLACK_CHANNEL || 'ops',
   },
   docker: {
     api: {
-      version: env.DOCKER_API_VERSION || '1.26'
+      version: env.DOCKER_API_VERSION || '1.26',
     },
     registry: {
       email: env.DOCKER_REGISTRY_EMAIL,
       username: env.DOCKER_REGISTRY_USERNAME,
-      password: env.DOCKER_REGISTRY_PASSWORD
-    }
+      password: env.DOCKER_REGISTRY_PASSWORD,
+    },
   },
   github: {
     username: env.GITHUB_USERNAME,
     password: env.GITHUB_PASSWORD,
     repository: env.GITHUB_REPOSITORY,
-    path: env.GITHUB_PATH
+    path: env.GITHUB_PATH,
   },
-  secretKey: env.SECRET_KEY
-};
+  secretKey: env.SECRET_KEY,
+}

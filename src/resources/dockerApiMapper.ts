@@ -1,6 +1,3 @@
-import * as config from 'config';
-import DockerApiMapper from '../lib/DockerApiMapper';
+import DockerApiMapper from '../lib/DockerApiMapper'
 
-export default new DockerApiMapper(
-  config.get<string>('docker.api.version')
-);
+export default new DockerApiMapper()

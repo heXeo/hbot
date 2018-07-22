@@ -1,42 +1,48 @@
 import {
   listDefinitions,
   getDefinition,
-  updateDefinition
-} from '../../controllers/swarm/definition';
+  updateDefinition,
+} from '../../controllers/swarm/definition'
 
-export default function () {
-  const mainCommand = this.rootCommand
-  .command('definition')
-  .showHelpOnEmpty();
-
-  mainCommand
-  .command('list')
-  .description('List definitions')
-  .action((metadata: any, options: any) => {
-    this.handle(metadata, listDefinitions());
-  });
+// FIXME: replace `this: any`
+export default function(this: any) {
+  const mainCommand = this.rootCommand.command('definition').showHelpOnEmpty()
 
   mainCommand
-  .command('show <name>')
-  .description('Show definitions')
-  .action((metadata: any, name: string, options: any) => {
-    this.handle(metadata, getDefinition(name));
-  });
+    .command('list')
+    .description('List definitions')
+    .action((metadata: any, _options: any) => {
+      this.handle(metadata, listDefinitions())
+    })
 
   mainCommand
-  .command('update <name> <sesrvicesTags...>')
-  .description([
-    "Update definition service's tags on repository",
-    'e.g.: !swarm definition mystack service1:tag1 service2:tag2'
-  ].join('\n'))
-  .action((metadata: any, name: string, servicesTags:any[], options: any) => {
-    this.handle(metadata, updateDefinition(name, servicesTags));
-  });
+    .command('show <name>')
+    .description('Show definitions')
+    .action((metadata: any, name: string, _options: any) => {
+      this.handle(metadata, getDefinition(name))
+    })
 
   mainCommand
-  .command('*', { noHelp: true })
-  .option('*', 'Catchall')
-  .action((metadata: any, options: any) => {
-    this.handle(metadata, Promise.resolve('Definitions sub-command not found...'));
-  });
+    .command('update <name> <sesrvicesTags...>')
+    .description(
+      [
+        'Update definition service\'s tags on repository',
+        'e.g.: !swarm definition mystack service1:tag1 service2:tag2',
+      ].join('\n')
+    )
+    .action(
+      (metadata: any, name: string, servicesTags: any[], _options: any) => {
+        this.handle(metadata, updateDefinition(name, servicesTags))
+      }
+    )
+
+  mainCommand
+    .command('*', {noHelp: true})
+    .option('*', 'Catchall')
+    .action((metadata: any, _options: any) => {
+      this.handle(
+        metadata,
+        Promise.resolve('Definitions sub-command not found...')
+      )
+    })
 }

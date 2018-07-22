@@ -1,10 +1,11 @@
-import { listNodes } from '../../controllers/swarm/node';
+import {listNodes} from '../../controllers/swarm/node'
 
-export default function () {
+// FIXME: replace `this: any`
+export default function(this: any) {
   this.rootCommand
-  .command('node')
-  .description('List nodes in the Swarm')
-  .action((metadata: any, options: any) => {
-    this.handle(metadata, listNodes());
-  });
+    .command('node')
+    .description('List nodes in the Swarm')
+    .action((metadata: any, _options: any) => {
+      this.handle(metadata, listNodes())
+    })
 }

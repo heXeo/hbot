@@ -1,20 +1,20 @@
-import * as request from 'request-promise-native';
+import request from 'request-promise-native'
 
 interface IGithubApiAuthOptions {
-  username: string;
-  password: string;
+  username: string
+  password: string
 }
 
 export default class GithubApi {
-  baseUrl: string;
-  auth: IGithubApiAuthOptions;
+  baseUrl: string
+  auth: IGithubApiAuthOptions
 
-  constructor (auth: IGithubApiAuthOptions) {
-    this.baseUrl = 'https://api.github.com';
-    this.auth = auth;
+  constructor(auth: IGithubApiAuthOptions) {
+    this.baseUrl = 'https://api.github.com'
+    this.auth = auth
   }
 
-  async req (method: string, path: string, options: any = {}): Promise<any> {
+  async req(method: string, path: string, options: any = {}): Promise<any> {
     const reqOptions: any = {
       baseUrl: this.baseUrl,
       uri: path,
@@ -22,34 +22,34 @@ export default class GithubApi {
       method: method,
       json: true,
       headers: {
-        'User-Agent': 'hbot'
-      }
-    };
+        'User-Agent': 'hbot',
+      },
+    }
 
     if (options.query) {
-      reqOptions.qs = options.query;
+      reqOptions.qs = options.query
     }
 
     if (options.body) {
-      reqOptions.body = options.body;
+      reqOptions.body = options.body
     }
 
-    return request(reqOptions);
+    return request(reqOptions)
   }
 
-  async get (path: string, options?: any) {
-    return this.req('get', path, options);
+  async get(path: string, options?: any) {
+    return this.req('get', path, options)
   }
 
-  async post (path: string, options?: any) {
-    return this.req('post', path, options);
+  async post(path: string, options?: any) {
+    return this.req('post', path, options)
   }
 
-  async put (path: string, options?: any) {
-    return this.req('put', path, options);
+  async put(path: string, options?: any) {
+    return this.req('put', path, options)
   }
 
-  async delete (path: string, options?: any) {
-    return this.req('delete', path, options);
+  async delete(path: string, options?: any) {
+    return this.req('delete', path, options)
   }
-};
+}

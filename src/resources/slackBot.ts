@@ -1,7 +1,7 @@
-import * as config from 'config';
-const SlackBot = require('slackbots');
+import config from 'config'
+const SlackBot = require('slackbots')
 
 export default new SlackBot({
   token: config.get<string>('slack.token'),
-  name: config.get<string>('slack.name')
-});
+  name: config.get<string>('slack.name'),
+})
