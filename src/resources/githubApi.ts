@@ -1,5 +1,5 @@
 import config from 'config'
-import GithubApi from '../lib/GithubApi'
+import GithubApi from '../libs/GithubApi'
 
 export default new GithubApi({
   username: config.get<string>('github.username'),

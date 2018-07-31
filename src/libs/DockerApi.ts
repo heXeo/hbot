@@ -26,7 +26,7 @@ interface IDockerApiRequestOptions {
 }
 
 export default class DockerApi {
-  private version: string
+  public readonly version: string
   private uri: string
   private agentToken: string | null = null
   private proxyAuth: any
@@ -73,7 +73,9 @@ export default class DockerApi {
     path: string,
     options: IDockerApiRequestOptions = {}
   ): Promise<any> {
-    const apiPath = pathLib.join('/', `v${this.version}`, path)
+    const apiPath = this.version
+      ? pathLib.join('/', `v${this.version}`, path)
+      : path
     const requestOptions: any = {
       method: method,
       auth: this.proxyAuth,

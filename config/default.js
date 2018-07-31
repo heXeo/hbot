@@ -16,9 +16,6 @@ module.exports = {
     channel: env.SLACK_CHANNEL || 'ops',
   },
   docker: {
-    api: {
-      version: env.DOCKER_API_VERSION || '1.26',
-    },
     registry: {
       email: env.DOCKER_REGISTRY_EMAIL,
       username: env.DOCKER_REGISTRY_USERNAME,

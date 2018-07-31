@@ -1,6 +1,6 @@
 import stream from 'stream'
 import _ from 'lodash'
-import DockerApi from '../lib/DockerApi'
+import DockerApi from '../libs/DockerApi'
 import {DockerEngine} from '../interfaces/docker/engine'
 
 const JStream = require('jstream')

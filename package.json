@@ -10,6 +10,7 @@
     "ajv": "^6.5.2",
     "bot-commander": "^1.1.1",
     "bytes": "^3.0.0",
+    "compare-versions": "^3.3.0",
     "config": "^1.30.0",
     "flat": "^4.1.0",
     "js-yaml": "^3.12.0",

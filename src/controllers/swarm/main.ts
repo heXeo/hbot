@@ -1,7 +1,9 @@
 import * as _ from 'lodash'
 import swarmSvc from '../../resources/swarm'
 import opsSvc from '../../resources/ops'
+import dockerApi from '../../resources/dockerApi'
 import dockerApiMapper from '../../resources/dockerApiMapper'
+import {composeVersionChecker} from '../../helpers/composeVersionChecker'
 
 export async function getInfos(): Promise<any> {
   const info = await swarmSvc.info()
@@ -25,6 +27,21 @@ export async function deploy(
   force: boolean = false
 ): Promise<string> {
   const definition = await opsSvc.getDefinition(definitionName)
+  const nodes = await swarmSvc.listNodes()
+
+  const validVersion = await composeVersionChecker(
+    definition.version,
+    nodes,
+    dockerApi.version
+  )
+  if (!validVersion) {
+    throw new Error(
+      `Docker compose version ${
+        definition.version
+      } is too high for at least one running Docker engine`
+    )
+  }
+
   const serviceApiContents = dockerApiMapper.mapServices(definition)
   const unreferencedServices = await swarmSvc.checkUnreferencedServices(
     definitionName,

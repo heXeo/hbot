@@ -1,6 +1,6 @@
 import yaml from 'js-yaml'
 import pathLib from 'path'
-import GithubApi from '../lib/GithubApi'
+import GithubApi from '../libs/GithubApi'
 import {Github} from '../interfaces/github'
 
 interface IOpsOptions {

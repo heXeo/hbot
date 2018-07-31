@@ -1,8 +1,8 @@
 import config from 'config'
-import DockerApi from '../lib/DockerApi'
+import DockerApi from '../libs/DockerApi'
 
 export default new DockerApi({
-  version: config.get<string>('docker.api.version'),
+  version: '1.26', // Only version implemented for now
   uri: config.get<string>('agent.uri'),
   agent: {
     token: config.get<string>('agent.token'),

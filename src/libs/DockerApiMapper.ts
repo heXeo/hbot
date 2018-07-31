@@ -1,6 +1,7 @@
 import Ajv from 'ajv'
 
 import {DockerCompose} from '../interfaces/docker/compose'
+import {normalizeComposeVersion} from '../helpers/composeVersionChecker'
 import * as Service from '../mappings/Service'
 
 export default class DockerApiMapper {
@@ -16,7 +17,7 @@ export default class DockerApiMapper {
   }
 
   mapServices(composeValues: DockerCompose.Compose) {
-    const composeVersion = composeValues.version
+    const composeVersion = normalizeComposeVersion(composeValues.version)
 
     if (!composeVersion) {
       throw new Error('Definition file have no version.')

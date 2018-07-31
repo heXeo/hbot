@@ -10,7 +10,7 @@ export namespace DockerCompose {
   }
 
   export interface Compose {
-    version?: string
+    version: string
     services?: Service.Collection
     networks?: Network.Collection
   }
